@@ -1,0 +1,148 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../sections/Header.astro';
+import Footer from '../sections/Footer.astro';
+import { supabase } from '../lib/supabase.js';
+
+const { data: habitaciones, error } = await supabase
+  .from('habitaciones')
+  .select('tipo')
+  .eq('estado', 'disponible');
+
+let dispPequena = 0;
+let dispMediana = 0;
+let dispGrande = 0;
+
+if (habitaciones) {
+  dispPequena = habitaciones.filter(h => h.tipo === 'Pequeña').length;
+  dispMediana = habitaciones.filter(h => h.tipo === 'Mediana').length;
+  dispGrande = habitaciones.filter(h => h.tipo === 'Grande').length;
+}
+---
+
+<Layout>
+  <Header />
+  
+  <main class="bg-[#faf1db] pt-32 pb-32 px-6 md:px-12 overflow-hidden">
+    <div class="max-w-6xl mx-auto">
+      
+      <div class="text-center mb-24 animate-fade-in-up">
+        <h1 class="text-4xl md:text-6xl font-bold text-[#028598] mb-6 drop-shadow-sm">Nuestras Habitaciones</h1>
+        <p class="text-[#028598]/80 text-lg max-w-2xl mx-auto font-light">
+          En este destino puedes conectar con la naturaleza y disfrutar de hermosos paisajes.
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-20 md:gap-28">
+        
+        <div class="flex flex-col md:flex-row items-center gap-12 group animate-fade-in-up">
+          <div class="w-full md:w-1/2 relative h-80 md:h-[450px] rounded-[2.5rem] overflow-hidden shadow-xl room-carousel transform transition-transform duration-700 ease-out group-hover:scale-[1.03] group-hover:shadow-2xl">
+            <img src="/room-small.webp" alt="Suite Esencial 1" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-100 slide bg-gray-200" />
+            <img src="/room-small-2.webp" alt="Suite Esencial 2" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0 slide bg-gray-200" />
+            <img src="/room-small-3.webp" alt="Suite Esencial 3" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0 slide bg-gray-200" />
+          </div>
+          
+          <div class="w-full md:w-1/2 flex flex-col justify-center">
+            <h2 class="text-4xl font-bold text-[#028598] mb-4 transition-colors duration-300 group-hover:text-[#016574]">Suite Esencial</h2>
+            <p class="text-[#028598]/80 mb-6 font-light leading-relaxed">
+              Ideal para recargar energías. Cuenta con decoración minimalista y ventanales con vista a nuestros jardines tropicales.
+            </p>
+            <ul class="list-disc pl-5 space-y-2 text-[#028598]/90 font-medium mb-8">
+              <li class="transition-transform duration-300 hover:translate-x-2 cursor-default">Capacidad para 1-2 huéspedes</li>
+              <li class="transition-transform duration-300 hover:translate-x-2 cursor-default">1 Cama Queen size</li>
+              <li class="transition-transform duration-300 hover:translate-x-2 cursor-default">Baño con regadera de lluvia</li>
+              <li class="text-green-700 font-bold transition-transform duration-300 hover:translate-x-2 cursor-default">{dispPequena} Disponibles ahora</li>
+            </ul>
+            <div>
+              <a href="/reservar?tipo=pequena" class="inline-block bg-[#028598] text-[#faf1db] px-10 py-4 rounded-2xl font-bold hover:bg-[#028598]/80 transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-2">
+                Cotizar desde $150
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <hr class="w-2/3 md:w-1/2 mx-auto border-t-2 border-[#028598]/15 rounded-full my-4" />
+
+        <div class="flex flex-col md:flex-row-reverse items-center gap-12 group animate-fade-in-up">
+          <div class="w-full md:w-1/2 relative h-80 md:h-[450px] rounded-[2.5rem] overflow-hidden shadow-xl room-carousel transform transition-transform duration-700 ease-out group-hover:scale-[1.03] group-hover:shadow-2xl">
+            <img src="/room-medium.webp" alt="Suite Confort 1" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-100 slide bg-gray-200" />
+            <img src="/room-medium-2.webp" alt="Suite Confort 2" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0 slide bg-gray-200" />
+            <img src="/room-medium-3.avif" alt="Suite Confort 3" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0 slide bg-gray-200" />
+          </div>
+          
+          <div class="w-full md:w-1/2 flex flex-col justify-center">
+            <h2 class="text-4xl font-bold text-[#028598] mb-4 transition-colors duration-300 group-hover:text-[#016574]">Suite Confort</h2>
+            <p class="text-[#028598]/80 mb-6 font-light leading-relaxed">
+              Mayor amplitud para una estancia relajante. Incluye una pequeña sala de estar y balcón privado para disfrutar de los atardeceres.
+            </p>
+            <ul class="list-disc pl-5 space-y-2 text-[#028598]/90 font-medium mb-8">
+              <li class="transition-transform duration-300 hover:translate-x-2 cursor-default">Capacidad para 2-3 huéspedes</li>
+              <li class="transition-transform duration-300 hover:translate-x-2 cursor-default">1 Cama King size + Sofá cama</li>
+              <li class="transition-transform duration-300 hover:translate-x-2 cursor-default">Baño con tina incluida</li>
+              <li class="text-green-700 font-bold transition-transform duration-300 hover:translate-x-2 cursor-default">{dispMediana} Disponibles ahora</li>
+            </ul>
+            <div>
+              <a href="/reservar?tipo=mediana" class="inline-block bg-[#028598] text-[#faf1db] px-10 py-4 rounded-2xl font-bold hover:bg-[#028598]/80 transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-2">
+                Cotizar desde $250
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <hr class="w-2/3 md:w-1/2 mx-auto border-t-2 border-[#028598]/15 rounded-full my-4" />
+
+        <div class="flex flex-col md:flex-row items-center gap-12 group animate-fade-in-up">
+          <div class="w-full md:w-1/2 relative h-80 md:h-[450px] rounded-[2.5rem] overflow-hidden shadow-xl room-carousel transform transition-transform duration-700 ease-out group-hover:scale-[1.03] group-hover:shadow-2xl">
+            <img src="/room-large.avif" alt="Villa 1" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-100 slide bg-gray-200" />
+            <img src="/room-large-2.webp" alt="Villa 2" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0 slide bg-gray-200" />
+            <img src="/room-large-3.avif" alt="Villa 3" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-0 slide bg-gray-200" />
+          </div>
+          
+          <div class="w-full md:w-1/2 flex flex-col justify-center">
+            <h2 class="text-4xl font-bold text-[#028598] mb-4 transition-colors duration-300 group-hover:text-[#016574]">Villa Presidencial</h2>
+            <p class="text-[#028598]/80 mb-6 font-light leading-relaxed">
+              Nuestra experiencia más exclusiva. Una villa privada con dos habitaciones, terraza panorámica, jacuzzi al aire libre y acceso a la playa.
+            </p>
+            <ul class="list-disc pl-5 space-y-2 text-[#028598]/90 font-medium mb-8">
+              <li class="transition-transform duration-300 hover:translate-x-2 cursor-default">Capacidad para 4-6 huéspedes</li>
+              <li class="transition-transform duration-300 hover:translate-x-2 cursor-default">2 Camas King size + 2 Individuales</li>
+              <li class="transition-transform duration-300 hover:translate-x-2 cursor-default">2 Baños completos + Jacuzzi exterior</li>
+              <li class="text-green-700 font-bold transition-transform duration-300 hover:translate-x-2 cursor-default">{dispGrande} Disponibles ahora</li>
+            </ul>
+            <div>
+              <a href="/reservar?tipo=grande" class="inline-block bg-[#028598] text-[#faf1db] px-10 py-4 rounded-2xl font-bold hover:bg-[#028598]/80 transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-2">
+                Cotizar desde $450
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const carousels = document.querySelectorAll('.room-carousel');
+    
+    carousels.forEach(carousel => {
+      const slides = carousel.querySelectorAll('.slide');
+      if(slides.length === 0) return;
+
+      let currentSlide = 0;
+
+      setInterval(() => {
+        slides[currentSlide].classList.remove('opacity-100');
+        slides[currentSlide].classList.add('opacity-0');
+        
+        currentSlide = (currentSlide + 1) % slides.length;
+        
+        slides[currentSlide].classList.remove('opacity-0');
+        slides[currentSlide].classList.add('opacity-100');
+      }, 4000);
+    });
+  });
+</script>

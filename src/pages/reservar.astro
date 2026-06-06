@@ -1,0 +1,594 @@
+---
+// Página de Reserva: Aquí es donde los usuarios pueden seleccionar sus fechas, elegir su habitación, agregar traslado y confirmar su reserva. Es el corazón del proceso de reserva, diseñado para ser intuitivo y visualmente atractivo, guiando al usuario paso a paso hacia la confirmación de su estancia en el Hotel Maya Bay.
+import Layout from '../layouts/Layout.astro';
+import Header from '../sections/Header.astro';
+import Footer from '../sections/Footer.astro';
+import 'flatpickr/dist/flatpickr.min.css';
+---
+
+<Layout>
+  <Header />
+  <main class="bg-[#faf1db] pt-32 pb-32 px-4 md:px-12 min-h-screen">
+    <div class="max-w-5xl mx-auto bg-white rounded-[2.5rem] shadow-2xl overflow-hidden">
+      
+      <div class="bg-[#028598] px-8 py-6 text-[#faf1db]">
+        <h1 class="text-3xl font-bold mb-4 text-center">Tu Escape al Paraíso</h1>
+        <div class="flex justify-between items-center text-sm font-medium relative">
+          <div class="absolute top-1/2 left-0 w-full h-0.5 bg-[#faf1db]/30 -z-0"></div>
+          <div class="flex flex-col items-center relative z-10" id="nav-step-1"><div class="w-8 h-8 rounded-full bg-[#faf1db] text-[#028598] flex items-center justify-center font-bold mb-1 shadow-md transition-colors duration-300">1</div><span>Estancia</span></div>
+          <div class="flex flex-col items-center relative z-10 opacity-50" id="nav-step-2"><div class="w-8 h-8 rounded-full bg-[#016574] text-[#faf1db] flex items-center justify-center font-bold mb-1 border border-[#faf1db]/50 transition-colors duration-300">2</div><span>Habitación</span></div>
+          <div class="flex flex-col items-center relative z-10 opacity-50" id="nav-step-3"><div class="w-8 h-8 rounded-full bg-[#016574] text-[#faf1db] flex items-center justify-center font-bold mb-1 border border-[#faf1db]/50 transition-colors duration-300">3</div><span>Traslado</span></div>
+          <div class="flex flex-col items-center relative z-10 opacity-50" id="nav-step-4"><div class="w-8 h-8 rounded-full bg-[#016574] text-[#faf1db] flex items-center justify-center font-bold mb-1 border border-[#faf1db]/50 transition-colors duration-300">4</div><span>Confirmar</span></div>
+        </div>
+      </div>
+
+      <div class="p-8 md:p-12 relative min-h-[500px]">
+        
+        <div id="step-1" class="step-container animate-fade-in-up block">
+          <h2 class="text-2xl font-bold text-[#028598] mb-6 text-center">¿Cuándo nos visitas?</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="flex flex-col md:col-span-2"><label class="text-[#028598] font-bold mb-2 ml-2">Fechas de tu estancia (Llegada a Salida)</label><input type="text" id="date-range" placeholder="Selecciona el día de Check-in y luego el de Check-out" class="bg-[#faf1db]/30 border-2 border-[#028598]/20 text-[#028598] rounded-2xl px-4 py-3 cursor-pointer" readonly required></div>
+            <div class="flex flex-col md:col-span-2"><label class="text-[#028598] font-bold mb-2 ml-2">Total de Huéspedes</label><input type="number" id="huespedes" min="1" max="6" value="2" class="bg-[#faf1db]/30 border-2 border-[#028598]/20 text-[#028598] rounded-2xl px-4 py-3" required></div>
+          </div>
+          <div class="text-center"><button id="btn-next-1" class="bg-[#028598] text-[#faf1db] px-10 py-4 rounded-full font-bold hover:bg-[#016574] hover:scale-105 transition-all w-full md:w-auto shadow-md">Buscar Disponibilidad</button><p id="error-step-1" class="text-red-500 mt-4 hidden font-medium">Por favor, selecciona tu rango de fechas en el calendario.</p></div>
+        </div>
+
+        <div id="step-2" class="step-container hidden">
+          <h2 class="text-2xl font-bold text-[#028598] mb-2 text-center">Selecciona tu Puerta al Paraíso</h2>
+          <p class="text-center text-[#028598]/70 mb-8 font-light">Explora el pasillo, las habitaciones en blanco están disponibles para tu grupo.</p>
+          
+          <div class="flex justify-center gap-6 mb-6 text-xs font-medium text-[#028598]">
+            <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-sm bg-white border border-[#028598]/30"></div> Disponible</div>
+            <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-sm bg-gray-200 border border-gray-300"></div> Ocupada/No apta</div>
+            <div class="flex items-center gap-2"><div class="w-3 h-3 rounded-sm bg-[#028598]"></div> Seleccionada</div>
+          </div>
+
+          <div class="flex justify-center gap-2 mb-8 bg-[#faf1db]/50 p-1.5 rounded-full w-max mx-auto border border-[#028598]/10 shadow-inner">
+            <button type="button" class="level-tab bg-[#028598] text-white px-6 py-2 rounded-full font-bold text-sm transition-all shadow-sm" data-target="nivel-1">Nivel 1</button>
+            <button type="button" class="level-tab text-[#028598] px-6 py-2 rounded-full font-bold text-sm hover:bg-[#028598]/10 transition-all" data-target="nivel-2">Nivel 2</button>
+            <button type="button" class="level-tab text-[#028598] px-6 py-2 rounded-full font-bold text-sm hover:bg-[#028598]/10 transition-all" data-target="nivel-3">Nivel 3</button>
+          </div>
+
+          <div id="hallway-area" class="relative pb-6 min-h-[350px]">
+            <div id="loading-indicator" class="text-center text-[#028598] py-8 font-bold animate-pulse absolute inset-x-0 top-0 hidden">Buscando habitaciones...</div>
+
+            <section id="nivel-1" class="level-section animate-fade-in-up block">
+              <h3 class="text-lg font-bold text-[#028598]/80 mb-4 pb-2 border-b-2 border-[#028598]/10 tracking-wide uppercase text-center md:text-left">Nivel 1: Suites Esenciales (1-2 huéspedes)</h3>
+              <div class="grid grid-cols-2 gap-x-12 md:gap-x-20 gap-y-4 relative rounded-3xl bg-[#f5f5f5] p-6 md:p-8 border border-[#028598]/5">
+                <div class="absolute inset-y-0 left-1/2 w-1 bg-[#028598]/10 rounded-full transform -translate-x-1/2"></div>
+                <div id="rooms-piso1-izq" class="space-y-3 pr-2"></div>
+                <div id="rooms-piso1-der" class="space-y-3 pl-2"></div>
+              </div>
+            </section>
+
+            <section id="nivel-2" class="level-section animate-fade-in-up hidden">
+              <h3 class="text-lg font-bold text-[#028598]/80 mb-4 pb-2 border-b-2 border-[#028598]/10 tracking-wide uppercase text-center md:text-left">Nivel 2: Suites Confort (1-3 huéspedes)</h3>
+              <div class="grid grid-cols-2 gap-x-12 md:gap-x-20 gap-y-4 relative rounded-3xl bg-[#f0f0f0] p-6 md:p-8 border border-[#028598]/5">
+                <div class="absolute inset-y-0 left-1/2 w-1 bg-[#028598]/10 rounded-full transform -translate-x-1/2"></div>
+                <div id="rooms-piso2-izq" class="space-y-3 pr-2"></div>
+                <div id="rooms-piso2-der" class="space-y-3 pl-2"></div>
+              </div>
+            </section>
+
+            <section id="nivel-3" class="level-section animate-fade-in-up hidden">
+              <h3 class="text-lg font-bold text-[#028598]/80 mb-4 pb-2 border-b-2 border-[#028598]/10 tracking-wide uppercase text-center md:text-left">Nivel 3: Villas de Lujo (1-6 huéspedes)</h3>
+              <div class="grid grid-cols-2 gap-x-12 md:gap-x-20 gap-y-4 relative rounded-3xl bg-[#e8e8e8] p-6 md:p-8 border border-[#028598]/5">
+                <div class="absolute inset-y-0 left-1/2 w-1 bg-[#028598]/10 rounded-full transform -translate-x-1/2"></div>
+                <div id="rooms-piso3-izq" class="space-y-3 pr-2"></div>
+                <div id="rooms-piso3-der" class="space-y-3 pl-2"></div>
+              </div>
+            </section>
+          </div>
+
+          <div class="flex justify-between items-center mt-8 border-t border-[#028598]/10 pt-6">
+            <button type="button" class="text-[#028598] font-bold hover:underline btn-back">← Volver</button>
+            <button type="button" id="btn-next-2" class="bg-[#028598] text-[#faf1db] px-10 py-3 rounded-full font-bold hover:bg-[#016574] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md" disabled>Continuar al Traslado</button>
+          </div>
+        </div>
+
+        <div id="step-3" class="step-container hidden">
+          <h2 class="text-2xl font-bold text-[#028598] mb-2 text-center">Traslado al Muelle (Opcional)</h2>
+          <p class="text-center text-[#028598]/70 mb-8 font-light">Selecciona tu horario y tus asientos.</p>
+          <div class="flex justify-center gap-4 mb-8">
+            <button type="button" id="btn-no-transfer" class="border-2 border-[#028598] px-6 py-2 rounded-full font-bold transition-colors bg-transparent text-[#028598]">No necesito traslado</button>
+            <button type="button" id="btn-yes-transfer" class="border-2 border-[#028598] px-6 py-2 rounded-full font-bold transition-colors shadow-md bg-[#028598] text-[#faf1db]">Sí, agregar traslado</button>
+          </div>
+          <div id="transfer-container" class="bg-[#faf1db]/20 p-6 rounded-3xl border border-[#028598]/10">
+            <label class="text-[#028598] font-bold mb-4 block text-center">Horarios Disponibles (Día del Check-in)</label>
+            <div class="flex justify-center gap-4 mb-8">
+              <button type="button" class="van-time-btn bg-white border-2 border-[#028598]/30 text-[#028598] px-4 py-2 rounded-xl font-bold hover:border-[#028598] transition-colors" data-van-id="7527e48f-8c29-4b89-bb3e-b0484a44ec45" data-time="10:00:00">10:00 AM</button>
+              <button type="button" class="van-time-btn bg-white border-2 border-[#028598]/30 text-[#028598] px-4 py-2 rounded-xl font-bold hover:border-[#028598] transition-colors" data-van-id="7fdfedc8-555d-48ab-8abb-cc431dee9625" data-time="14:00:00">02:00 PM</button>
+              <button type="button" class="van-time-btn bg-white border-2 border-[#028598]/30 text-[#028598] px-4 py-2 rounded-xl font-bold hover:border-[#028598] transition-colors" data-van-id="e5e86194-41fb-4e05-817d-386626c9cf86" data-time="18:00:00">06:00 PM</button>
+            </div>
+            <div id="seat-map-container" class="hidden">
+              <p class="text-center text-[#028598] font-bold mb-4">Selecciona <span id="seats-needed">0</span> asiento(s)</p>
+              <div class="w-32 h-8 bg-gray-300 rounded-t-xl mx-auto mb-6 flex items-center justify-center text-xs text-gray-600 font-bold">CONDUCTOR</div>
+              <div id="seat-map" class="grid grid-cols-4 gap-4 max-w-xs mx-auto mb-6"></div>
+            </div>
+          </div>
+          <div class="flex flex-col md:flex-row justify-between items-center mt-8 border-t border-[#028598]/10 pt-8 gap-4">
+            <button type="button" class="text-[#028598] font-bold hover:underline btn-back">← Volver</button>
+            <div class="text-right flex flex-col items-end">
+              <p id="error-step-3" class="text-red-500 text-sm font-bold mb-2 hidden">¡Selecciona tus asientos arriba o marca 'No necesito traslado'!</p>
+              <button type="button" id="btn-next-3" class="bg-[#028598] text-[#faf1db] px-10 py-4 rounded-full font-bold hover:bg-[#016574] transition-all shadow-md">Revisar y Confirmar</button>
+            </div>
+          </div>
+        </div>
+
+<div id="step-4" class="step-container hidden">
+          <h2 class="text-2xl font-bold text-[#028598] mb-8 text-center">Resumen de tu Reserva</h2>
+          <div class="bg-[#faf1db]/30 rounded-3xl p-8 border border-[#028598]/10 text-[#028598] mb-8">
+            <div class="grid grid-cols-2 gap-4 mb-6 text-lg">
+              <div><span class="font-bold">Check-in:</span> <span id="summary-checkin"></span></div>
+              <div><span class="font-bold">Check-out:</span> <span id="summary-checkout"></span></div>
+              <div><span class="font-bold">Huéspedes:</span> <span id="summary-guests"></span></div>
+              <div><span class="font-bold">Habitación Seleccionada:</span> <span id="summary-room"></span></div>
+            </div>
+            <div id="summary-transfer-box" class="bg-white p-4 rounded-2xl border border-[#028598]/20 mb-6 hidden">
+              <h3 class="font-bold mb-2">Traslado Incluido</h3>
+              <p>Horario: <span id="summary-van-time"></span> | Asientos reservados: <span id="summary-seats"></span></p>
+            </div>
+            <div class="text-right text-3xl font-bold border-t border-[#028598]/20 pt-4">Total: $<span id="summary-total">0</span></div>
+          </div>
+          <div class="flex flex-col gap-4 max-w-md mx-auto mb-8">
+            <input type="text" id="client-name" placeholder="Nombre Completo" class="bg-[#faf1db]/30 border-2 border-[#028598]/20 text-[#028598] rounded-xl px-4 py-3 focus:outline-none focus:border-[#028598] transition-colors" required>
+            <input type="email" id="client-email" placeholder="Correo Electrónico" class="bg-[#faf1db]/30 border-2 border-[#028598]/20 text-[#028598] rounded-xl px-4 py-3 focus:outline-none focus:border-[#028598] transition-colors" required>
+          </div>
+          <div class="flex flex-col md:flex-row justify-between items-center mt-8 border-t border-[#028598]/10 pt-8 gap-4">
+            <button type="button" class="text-[#028598] font-bold hover:underline btn-back">← Editar Detalles</button>
+            <div class="text-right flex flex-col items-end">
+              <p id="error-step-4" class="text-red-500 text-sm font-bold mb-2 hidden">¡Por favor llena tu nombre y correo!</p>
+              <button type="button" id="btn-submit" class="bg-green-600 text-white px-10 py-4 rounded-full font-bold hover:bg-green-700 hover:scale-105 transition-all shadow-lg">Confirmar Reserva Definitiva</button>
+            </div>
+          </div>
+        </div> <div id="step-success" class="hidden text-center py-16 animate-fade-in-up">
+          <div class="w-24 h-24 bg-[#028598]/10 text-[#028598] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <h2 class="text-4xl font-bold text-[#028598] mb-4">¡Reserva Confirmada!</h2>
+          <p class="text-lg text-neutral-600 mb-8">Tus lugares están asegurados. ¡Te esperamos pronto en el paraíso de Hotel Maya Bay!</p>
+          <button onclick="window.location.reload()" class="bg-[#faf1db] text-[#028598] px-8 py-3 rounded-full font-bold hover:bg-white hover:scale-105 transition-all shadow-md">
+            Hacer otra reserva
+          </button>
+        </div>
+        </div>
+    </div>
+  </main>
+  
+  <Footer />
+</Layout>
+
+<script>
+  import { supabase } from '../lib/supabase.js';
+  import flatpickr from "flatpickr";
+  import { Spanish } from "flatpickr/dist/l10n/es.js";
+
+  document.addEventListener('DOMContentLoaded', () => {
+    
+    // Objeto de estado (state) que persiste los datos del usuario a través de los pasos del formulario. Esto nos permite mantener la información seleccionada mientras el usuario navega entre las diferentes secciones (Estancia, Habitación, Traslado, Confirmación).
+    interface BookingData { step: number; checkIn: string; checkOut: string; guests: number; roomId: any; roomPrice: number; roomName: string; wantsTransfer: boolean; vanId: any; vanTime: string; selectedSeats: number; }
+    let bookingData: BookingData = { step: 1, checkIn: '', checkOut: '', guests: 2, roomId: null, roomPrice: 0, roomName: '', wantsTransfer: true, vanId: null, vanTime: '', selectedSeats: 0 };
+    // Referencias a elementos del DOM para manipular la vista (Single Page Application feel)
+    const steps = [ document.getElementById('step-1')!, document.getElementById('step-2')!, document.getElementById('step-3')!, document.getElementById('step-4')! ];
+    const navDots = [ document.getElementById('nav-step-1')!, document.getElementById('nav-step-2')!, document.getElementById('nav-step-3')!, document.getElementById('nav-step-4')! ];
+
+    // Función principal de navegación: alterna la visibilidad de los pasos
+    function showStep(stepNum: number) {
+      steps.forEach((s, index) => { if(index + 1 === stepNum) { s.classList.remove('hidden'); s.classList.add('animate-fade-in-up'); } else { s.classList.add('hidden'); s.classList.remove('animate-fade-in-up'); } });
+      // Actualización visual de los indicadores de navegación (dots)
+      navDots.forEach((dot, index) => { const circle = dot.querySelector('div')!; if (index + 1 <= stepNum) { dot.classList.remove('opacity-50'); circle.className = "w-8 h-8 rounded-full bg-[#faf1db] text-[#028598] flex items-center justify-center font-bold mb-1 shadow-md transition-colors duration-300"; } else { dot.classList.add('opacity-50'); circle.className = "w-8 h-8 rounded-full bg-[#016574] text-[#faf1db] flex items-center justify-center font-bold mb-1 border border-[#faf1db]/50 transition-colors duration-300"; } });
+      bookingData.step = stepNum;
+    }
+
+    document.querySelectorAll('.btn-back').forEach(btn => { btn.addEventListener('click', () => { if(bookingData.step > 1) showStep(bookingData.step - 1); }); });
+
+    let selectedCheckIn = "";
+    let selectedCheckOut = "";
+
+    // Inicialización del selector de fechas usando Flatpickr para asegurar formato ISO y manejo de zonas horarias. El usuario selecciona un rango de fechas, y el código ajusta las fechas seleccionadas a formato ISO (YYYY-MM-DD) para almacenarlas en el estado de la reserva.
+    flatpickr("#date-range", { mode: "range", minDate: "today", locale: Spanish, dateFormat: "Y-m-d", altInput: true, altFormat: "j F, Y", onChange: function(selectedDates) { if (selectedDates.length === 2) { const tzoffset = (new Date()).getTimezoneOffset() * 60000; selectedCheckIn = new Date(selectedDates[0].getTime() - tzoffset).toISOString().split('T')[0]; selectedCheckOut = new Date(selectedDates[1].getTime() - tzoffset).toISOString().split('T')[0]; } else { selectedCheckIn = ""; selectedCheckOut = ""; } } });
+
+    document.getElementById('btn-next-1')!.addEventListener('click', async () => {
+      const huespedesInput = document.getElementById('huespedes') as HTMLInputElement;
+      if(!selectedCheckIn || !selectedCheckOut) { document.getElementById('error-step-1')!.classList.remove('hidden'); return; }
+      document.getElementById('error-step-1')!.classList.add('hidden');
+      bookingData.checkIn = selectedCheckIn; bookingData.checkOut = selectedCheckOut; bookingData.guests = parseInt(huespedesInput.value);
+      showStep(2); await loadHallwayMap();
+    });
+
+    // LÓGICA DE PESTAÑAS (TABS)
+    const levelTabs = document.querySelectorAll('.level-tab');
+    const levelSections = document.querySelectorAll('.level-section');
+
+    levelTabs.forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        levelTabs.forEach(t => { t.classList.remove('bg-[#028598]', 'text-white', 'shadow-sm'); t.classList.add('text-[#028598]', 'hover:bg-[#028598]/10'); });
+        const targetBtn = e.target as HTMLElement;
+        targetBtn.classList.add('bg-[#028598]', 'text-white', 'shadow-sm');
+        targetBtn.classList.remove('text-[#028598]', 'hover:bg-[#028598]/10');
+        const targetId = targetBtn.getAttribute('data-target');
+        levelSections.forEach(section => {
+          if (section.id === targetId) { section.classList.remove('hidden'); section.classList.add('block'); } else { section.classList.add('hidden'); section.classList.remove('block'); }
+        });
+      });
+    });
+
+    // Función asíncrona que consulta disponibilidad en Supabase mediante un Join de tablas
+    async function loadHallwayMap() {
+      const loading = document.getElementById('loading-indicator')!;
+      const btnNext2 = document.getElementById('btn-next-2') as HTMLButtonElement;
+      
+      const containers = {
+        mapIzq1: document.getElementById('rooms-piso1-izq')!,
+        mapDer1: document.getElementById('rooms-piso1-der')!,
+        mapIzq2: document.getElementById('rooms-piso2-izq')!,
+        mapDer2: document.getElementById('rooms-piso2-der')!,
+        mapIzq3: document.getElementById('rooms-piso3-izq')!,
+        mapDer3: document.getElementById('rooms-piso3-der')!,
+      };
+
+      Object.values(containers).forEach(c => c.innerHTML = '');
+      loading.classList.remove('hidden');
+      bookingData.roomId = null; btnNext2.disabled = true;
+
+      // Reseteamos a Nivel 1
+      (levelTabs[0] as HTMLElement).click();
+
+      // Consulta a Supabase para obtener todas las habitaciones y las reservas que se solapan con las fechas seleccionadas. Luego, se generan los botones de cada habitación en el mapa, deshabilitando aquellos que están ocupados o no son aptos para el número de huéspedes seleccionado.
+      try {
+        const { data: allRooms } = await supabase.from('habitaciones').select('*').order('numero', { ascending: true });
+        const { data: ocupadas } = await supabase.from('reservas_habitacion').select('habitacion_id').lte('fecha_entrada', bookingData.checkOut).gte('fecha_salida', bookingData.checkIn);
+        const occupiedIds = ocupadas ? ocupadas.map(r => r.habitacion_id) : [];
+
+        loading.classList.add('hidden'); 
+
+        if (allRooms) {
+          allRooms.forEach(room => {
+            const isOccupied = occupiedIds.includes(room.id);
+            let isTooSmall = false;
+            if(bookingData.guests > 2 && room.tipo === 'Pequeña') isTooSmall = true;
+            if(bookingData.guests > 3 && room.tipo === 'Mediana') isTooSmall = true;
+            const isDisabled = isOccupied || isTooSmall;
+
+            const floorNumber = room.numero.charAt(0);
+            const isEven = parseInt(room.numero) % 2 === 0;
+            const side = isEven ? 'Izq' : 'Der';
+            const targetContainer = containers[`map${side}${floorNumber}` as keyof typeof containers];
+
+            if (!targetContainer) return;
+
+            const btn = document.createElement('button') as HTMLButtonElement;
+            btn.className = `w-full h-20 md:h-24 rounded-xl border-2 flex flex-col items-center justify-center transition-all shadow-sm ${
+              isDisabled 
+              ? 'bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed opacity-60' 
+              : 'bg-white border-[#028598]/20 text-[#028598] hover:border-[#028598] hover:scale-105 hover:shadow-lg'
+            }`;
+            const handleSide = isEven ? 'right-2' : 'left-2';
+            btn.innerHTML = `
+              <div class="relative w-full h-full flex flex-col items-center justify-center">
+                <span class="text-[10px] md:text-xs font-bold opacity-75 uppercase tracking-widest">${room.tipo}</span>
+                <span class="text-2xl md:text-3xl font-bold tracking-tight mt-1">${room.numero}</span>
+                <div class="absolute ${handleSide} top-1/2 w-1.5 h-1.5 bg-current rounded-full transform -translate-y-1/2 opacity-50"></div>
+              </div>
+            `;
+            btn.disabled = isDisabled;
+
+            if(!isDisabled) {
+              btn.addEventListener('click', () => {
+                Object.values(containers).forEach(c => {
+                  c.querySelectorAll('button').forEach(b => {
+                    const btnEl = b as HTMLButtonElement;
+                    if(!btnEl.disabled) {
+                      btnEl.classList.remove('bg-[#028598]', 'text-white');
+                      btnEl.classList.add('bg-white', 'text-[#028598]');
+                    }
+                  });
+                });
+                
+                btn.classList.remove('bg-white', 'text-[#028598]');
+                btn.classList.add('bg-[#028598]', 'text-white');
+                
+                bookingData.roomId = room.id;
+                bookingData.roomPrice = room.precio;
+                bookingData.roomName = `Puerta ${room.numero} (${room.tipo} en Nivel ${floorNumber})`;
+                btnNext2.disabled = false;
+              });
+            }
+            targetContainer.appendChild(btn);
+          });
+        }
+      } catch (err) { console.error(err); loading.innerHTML = '<div class="text-red-500 text-center">Error al conectar con la base de datos.</div>'; }
+    }
+
+    // ================= LÓGICA PASO 2 -> 3 =================
+    document.getElementById('btn-next-2')!.addEventListener('click', () => { 
+      showStep(3); 
+      
+      // 1. Reseteamos los datos
+      bookingData.selectedSeats = 0; 
+      bookingData.vanId = null;
+      bookingData.vanTime = '';
+      bookingData.wantsTransfer = true; 
+      
+      // 2. Reseteamos visualmente los botones de "Sí / No"
+      btnYesTransfer.classList.remove('bg-transparent', 'text-[#028598]'); 
+      btnYesTransfer.classList.add('bg-[#028598]', 'text-[#faf1db]'); 
+      btnNoTransfer.classList.remove('bg-[#028598]', 'text-[#faf1db]'); 
+      btnNoTransfer.classList.add('bg-transparent', 'text-[#028598]'); 
+      transferContainer.classList.remove('hidden'); 
+
+      // 3. Reseteamos visualmente los horarios seleccionados
+      document.querySelectorAll('.van-time-btn').forEach(b => { 
+        b.classList.remove('bg-[#028598]', 'text-white', 'border-transparent', 'scale-105', 'shadow-md'); 
+        b.classList.add('bg-white', 'text-[#028598]', 'border-[#028598]/30'); 
+      }); 
+
+      // 4. Escondemos y limpiamos el mapa de asientos viejos
+      document.getElementById('seat-map-container')!.classList.add('hidden');
+      document.getElementById('seat-map')!.innerHTML = '';
+      
+      // 5. Ocultamos la advertencia roja por si estaba visible
+      document.getElementById('error-step-3')!.classList.add('hidden');
+    });
+
+    const btnNoTransfer = document.getElementById('btn-no-transfer')!;
+    const btnYesTransfer = document.getElementById('btn-yes-transfer')!;
+    const transferContainer = document.getElementById('transfer-container')!;
+    
+    // Lógica para los botones de traslado: al seleccionar "No necesito traslado", se actualiza el estado para reflejar que el usuario no desea traslado, se actualizan las clases CSS para mostrar visualmente cuál opción está activa, y se oculta la sección de selección de horarios y asientos. Al seleccionar "Sí, agregar traslado", se hace lo contrario: se marca que el usuario quiere traslado, se actualizan las clases para reflejar la selección, y se muestra la sección de horarios y asientos.
+    btnNoTransfer.addEventListener('click', () => { 
+      bookingData.wantsTransfer = false; 
+      
+      // "No" se vuelve ACTIVO 
+      btnNoTransfer.classList.remove('bg-transparent', 'text-[#028598]'); 
+      btnNoTransfer.classList.add('bg-[#028598]', 'text-[#faf1db]'); 
+      
+      // "Sí" se vuelve INACTIVO 
+      btnYesTransfer.classList.remove('bg-[#028598]', 'text-[#faf1db]'); 
+      btnYesTransfer.classList.add('bg-transparent', 'text-[#028598]'); 
+      
+      transferContainer.classList.add('hidden'); 
+    });
+    
+    btnYesTransfer.addEventListener('click', () => { 
+      bookingData.wantsTransfer = true; 
+      
+      // "Sí" se vuelve ACTIVO 
+      btnYesTransfer.classList.remove('bg-transparent', 'text-[#028598]'); 
+      btnYesTransfer.classList.add('bg-[#028598]', 'text-[#faf1db]'); 
+      
+      // "No" se vuelve INACTIVO 
+      btnNoTransfer.classList.remove('bg-[#028598]', 'text-[#faf1db]'); 
+      btnNoTransfer.classList.add('bg-transparent', 'text-[#028598]'); 
+      
+      transferContainer.classList.remove('hidden'); 
+    });
+
+    // --- BOTONES DE HORARIO ---
+    document.querySelectorAll('.van-time-btn').forEach(btn => { 
+      btn.addEventListener('click', async (e) => { 
+        document.querySelectorAll('.van-time-btn').forEach(b => { 
+          b.classList.remove('bg-[#028598]', 'text-white', 'border-transparent', 'scale-105', 'shadow-md'); 
+          b.classList.add('bg-white', 'text-[#028598]', 'border-[#028598]/30'); 
+        }); 
+        
+        const target = e.target as HTMLElement; 
+        target.classList.remove('bg-white', 'text-[#028598]', 'border-[#028598]/30');
+        target.classList.add('bg-[#028598]', 'text-white', 'border-transparent', 'scale-105', 'shadow-md'); 
+        
+        bookingData.vanId = target.getAttribute('data-van-id'); 
+        bookingData.vanTime = target.getAttribute('data-time') || ''; 
+        await loadVanSeats(bookingData.vanId, bookingData.vanTime); 
+      }); 
+    });
+
+    // Función asíncrona que carga el mapa de asientos para la camioneta seleccionada. Consulta a Supabase las reservas de traslado para la camioneta y fecha seleccionada, calcula cuántos asientos están ocupados, y genera un botón para cada asiento (16 en total), deshabilitando aquellos que ya están ocupados. Además, permite al usuario seleccionar los asientos disponibles, actualizando el estado de la reserva con el número de asientos seleccionados.
+    async function loadVanSeats(vanId: any, time: string) {
+      document.getElementById('seat-map-container')!.classList.remove('hidden'); 
+      const seatMap = document.getElementById('seat-map')!; 
+      seatMap.innerHTML = 'Cargando...'; 
+      document.getElementById('seats-needed')!.innerText = bookingData.guests.toString(); 
+      bookingData.selectedSeats = 0;
+
+      try { 
+        // 1. Unimos el día de llegada (checkIn) con la hora seleccionada (time)
+        const fechaExacta = `${bookingData.checkIn}T${time}`;
+
+        // 2. Filtramos en Supabase por la Camioneta Y por la Fecha Exacta
+        const { data: reservasVan } = await supabase
+          .from('reservas_traslado')
+          .select('num_pasajeros')
+          .eq('camioneta_id', vanId)
+          .eq('fecha_hora', fechaExacta);
+
+        let occupiedSeatsTotal = 0; 
+        if(reservasVan) { 
+          reservasVan.forEach(r => occupiedSeatsTotal += r.num_pasajeros);
+        } 
+
+        seatMap.innerHTML = ''; 
+        for(let i=1; i<=16; i++) { 
+          const isOccupied = i <= occupiedSeatsTotal; 
+          const seat = document.createElement('button') as HTMLButtonElement;
+
+          seat.className = `w-12 h-12 mx-auto rounded-t-xl rounded-b-md flex items-center justify-center font-bold transition-all ${ 
+            isOccupied ? 'bg-gray-400 text-white cursor-not-allowed opacity-50' : 'bg-white border-2 border-[#028598] text-[#028598] hover:bg-[#faf1db] hover:scale-110 hover:shadow-lg hover:border-transparent' 
+          }`; 
+          
+          seat.innerText = i.toString();
+          seat.disabled = isOccupied;
+
+          if(!isOccupied) { 
+            seat.addEventListener('click', () => { 
+              const isSelected = seat.classList.contains('bg-[#028598]'); 
+              if(isSelected) { 
+                seat.classList.remove('bg-[#028598]', 'text-white', 'scale-110', 'shadow-lg', 'border-transparent');
+                seat.classList.add('bg-white', 'text-[#028598]', 'border-2', 'border-[#028598]'); 
+                bookingData.selectedSeats--; 
+              } else { 
+                if(bookingData.selectedSeats < bookingData.guests) {
+                  seat.classList.add('bg-[#028598]', 'text-white', 'scale-110', 'shadow-lg', 'border-transparent');
+                  seat.classList.remove('bg-white', 'text-[#028598]', 'border-2', 'border-[#028598]');
+                  bookingData.selectedSeats++; 
+                } else { 
+                  alert(`Ya seleccionaste tus ${bookingData.guests} asientos.`); 
+                } 
+              } 
+            });
+          } 
+          seatMap.appendChild(seat); 
+        } 
+      } catch (err) { 
+        console.error(err); 
+      } 
+    }   
+
+    // ================= LÓGICA PASO 3 -> 4 =================
+    // Antes de mostrar el resumen, se valida que si el usuario eligió traslado, haya seleccionado la cantidad de asientos igual al número de huéspedes. Si no es así, se muestra un mensaje de error. Si todo está correcto, se calcula el total de la reserva (días multiplicados por precio de habitación, más $60 si eligió traslado), se actualiza el resumen con los detalles seleccionados, y se muestra el paso 4.
+    document.getElementById('btn-next-3')!.addEventListener('click', () => { 
+      if(bookingData.wantsTransfer && bookingData.selectedSeats !== bookingData.guests) { 
+        document.getElementById('error-step-3')!.classList.remove('hidden'); 
+        return; 
+      } 
+      document.getElementById('error-step-3')!.classList.add('hidden'); 
+      document.getElementById('summary-checkin')!.innerText = bookingData.checkIn; 
+      document.getElementById('summary-checkout')!.innerText = bookingData.checkOut; 
+      document.getElementById('summary-guests')!.innerText = bookingData.guests.toString(); 
+      document.getElementById('summary-room')!.innerText = bookingData.roomName; 
+      
+      const d1 = new Date(bookingData.checkIn); 
+      const d2 = new Date(bookingData.checkOut); 
+      const diffTime = Math.abs(d2.getTime() - d1.getTime()); 
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+      let total = diffDays * bookingData.roomPrice; 
+      
+      if(bookingData.wantsTransfer) { 
+        document.getElementById('summary-transfer-box')!.classList.remove('hidden'); 
+        document.getElementById('summary-van-time')!.innerText = bookingData.vanTime; 
+        document.getElementById('summary-seats')!.innerText = bookingData.selectedSeats.toString(); 
+        total += 60; 
+      } else { 
+        document.getElementById('summary-transfer-box')!.classList.add('hidden'); 
+      } 
+      document.getElementById('summary-total')!.innerText = total.toString(); 
+      showStep(4); 
+    });
+    
+    // ================= FINAL: CONFIRMAR Y ENVIAR =================
+    const btnSubmit = document.getElementById('btn-submit') as HTMLButtonElement;
+    
+    btnSubmit.addEventListener('click', async () => {
+      const nameInput = document.getElementById('client-name') as HTMLInputElement;
+      const emailInput = document.getElementById('client-email') as HTMLInputElement;
+      
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      
+      if (!name || !email) {
+        alert("Por favor, llena tu nombre y correo para continuar.");
+        return;
+      }
+      
+      btnSubmit.innerText = "Procesando...";
+      btnSubmit.disabled = true;
+
+      try {
+        // ¿La habitación sigue disponible?
+        const { data: checkHab } = await supabase
+          .from('reservas_habitacion')
+          .select('id')
+          .eq('habitacion_id', bookingData.roomId)
+          .lte('fecha_entrada', bookingData.checkOut)
+          .gte('fecha_salida', bookingData.checkIn);
+
+        if (checkHab && checkHab.length > 0) {
+          alert("¡Ups! Alguien más acaba de reservar esta habitación en esas fechas. Por favor, elige otra.");
+          btnSubmit.innerText = "Confirmar Reserva Definitiva";
+          btnSubmit.disabled = false;
+
+          showStep(1);
+
+          return; 
+        }
+
+        // ¿La camioneta sigue teniendo asientos libres?
+        if (bookingData.wantsTransfer) {
+          const fechaExacta = `${bookingData.checkIn}T${bookingData.vanTime}`;
+          const { data: checkVan } = await supabase
+            .from('reservas_traslado')
+            .select('num_pasajeros')
+            .eq('camioneta_id', bookingData.vanId)
+            .eq('fecha_hora', fechaExacta);
+            
+          let ocupadosAhora = 0;
+          if (checkVan) {
+            checkVan.forEach(r => ocupadosAhora += r.num_pasajeros);
+          }
+          
+          if (ocupadosAhora + bookingData.guests > 16) {
+            alert("¡Ups! Alguien acaba de ganar esos asientos en la camioneta. Por favor, elige otro horario.");
+            btnSubmit.innerText = "Confirmar Reserva Definitiva";
+            btnSubmit.disabled = false;
+
+            showStep(1);
+
+            return;
+          }
+        }
+
+        // PROCEDEMOS A GUARDAR:
+        const { data: resHab, error: errHab } = await supabase
+          .from('reservas_habitacion')
+          .insert([{
+            cliente_nombre: name,
+            cliente_email: email,
+            habitacion_id: bookingData.roomId,
+            fecha_entrada: bookingData.checkIn,
+            fecha_salida: bookingData.checkOut
+          }])
+          .select();
+          
+        if (errHab) throw errHab;
+        
+        const nuevaReservaId = resHab[0].id;
+
+        if (bookingData.wantsTransfer) {
+          const fechaExacta = `${bookingData.checkIn}T${bookingData.vanTime}`;
+          const { error: errTrans } = await supabase
+            .from('reservas_traslado')
+            .insert([{
+              reserva_habitacion_id: nuevaReservaId,
+              camioneta_id: bookingData.vanId,
+              fecha_hora: fechaExacta,
+              num_pasajeros: bookingData.guests,
+              tipo_traslado: 'check-in'
+            }]);
+            
+          if (errTrans) throw errTrans;
+        }
+
+        // Ocultar paso 4 y mostrar confirmación
+        document.getElementById('step-4')!.classList.add('hidden');
+        document.getElementById('step-success')!.classList.remove('hidden');
+
+      } catch (error) {
+        console.error(error);
+        alert("Hubo un error al guardar la reserva. Revisa la consola para más detalles.");
+        btnSubmit.innerText = "Confirmar Reserva Definitiva";
+        btnSubmit.disabled = false;
+      }
+    });
+  });
+</script>
+
+<style>
+  /* Estilos para el mapa de asientos y áreas de pasillo */
+  #seat-map button, #hallway-area section button {
+    position: relative;
+  }
+  #seat-map button::after {
+    content: ''; position: absolute; bottom: -4px; left: 10%; width: 80%; height: 4px; background-color: inherit; border-radius: 0 0 4px 4px; opacity: 0.5;
+  }
+</style>

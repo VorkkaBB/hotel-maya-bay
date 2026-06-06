@@ -1,0 +1,34 @@
+<section class="relative w-full h-screen overflow-hidden flex items-center justify-center">
+  <div id="hero-carousel" class="absolute inset-0 z-0">
+    <img src="/hero-1.webp" alt="Maya Bay 1" class="absolute inset-0 w-full h-full object-cover opacity-100 transition-opacity duration-1000 slide" />
+    <img src="/hero-2.webp" alt="Maya Bay 2" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000 slide" />
+    <img src="/hero-3.webp" alt="Maya Bay 3" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000 slide" />
+  </div>
+
+  <div class="absolute inset-0 bg-[#028598]/40 z-10"></div>
+
+  <div class="relative z-20 text-center text-[#faf1db] px-4 animate-fade-in-up">
+    <h1 class="text-5xl md:text-7xl font-bold mb-4 drop-shadow-[0_4px_6px_rgba(2,133,152,0.8)]">Descubre el Paraíso</h1>
+    <p class="text-xl md:text-2xl font-light mb-8 drop-shadow-md">Tu escape perfecto en Koh Phi Phi Leh</p>
+    
+    <a href="#habitaciones" class="bg-[#faf1db] hover:bg-white text-[#028598] font-bold py-3 px-8 rounded-full transition-all hover:scale-105 shadow-lg inline-block">
+      Ver Habitaciones
+    </a>
+  </div>
+</section>
+
+<script>
+  // Lógica para el carrusel de imágenes en el Hero. Se seleccionan todas las imágenes con la clase "slide" y se alterna su opacidad cada 5 segundos para crear un efecto de transición suave entre ellas.
+  const slides = document.querySelectorAll('.slide');
+  let currentSlide = 0;
+
+  setInterval(() => {
+    slides[currentSlide].classList.remove('opacity-100');
+    slides[currentSlide].classList.add('opacity-0');
+    
+    currentSlide = (currentSlide + 1) % slides.length;
+    
+    slides[currentSlide].classList.remove('opacity-0');
+    slides[currentSlide].classList.add('opacity-100');
+  }, 5000); 
+</script>

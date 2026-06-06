@@ -1,0 +1,81 @@
+---
+import GradientOverlay from '../components/GradientOverlay.astro';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<title>Hotel Maya Bay</title>
+		<meta name="description" content="Hotel Maya Bay - A tropical paradise for your next vacation" />
+		<meta name="keywords" content="Hotel, Maya Bay, tropical, paradise, vacation" />
+		<meta name="author" content="vorkkaDev / Paulina" />
+		<meta name="robots" content="index, follow" />
+		<meta name="googlebot" content="index, follow" />
+		<meta name="bingbot" content="index, follow" />
+		<meta name="yandexbot" content="index, follow" />
+	</head>
+	<body>
+		<div id="background-mask" class="min-h-screen w-full">
+			<GradientOverlay />
+			<div class="relative z-2">
+		  <slot />
+		</div>
+	</body>
+</html>
+
+<style is:global>
+	/* Importamos Tailwind CSS */
+	@import 'tailwindcss';
+	@import 'tailwind-animations';
+
+
+	body {
+		/* Aplicamos el color base crema/arena de la identidad visual del hotel */
+		background: #faf1db;
+	}
+
+	/* Reset básico para asegurar que el HTML y el Body no tengan márgenes por defecto y ocupen todo el espacio */
+	html,
+	body {
+		margin: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+	/* Estilos para el calendario de selección de fechas (flatpickr) */
+	.flatpickr-day.selected, 
+  .flatpickr-day.startRange, 
+  .flatpickr-day.endRange, 
+  .flatpickr-day.selected.inRange, 
+  .flatpickr-day.startRange.inRange, 
+  .flatpickr-day.endRange.inRange {
+      background: #028598 !important; 
+      border-color: #028598 !important;
+  }
+
+  .flatpickr-day:hover, 
+  .flatpickr-day.prevMonthDay:hover, 
+  .flatpickr-day.nextMonthDay:hover {
+      background: #faf1db !important; 
+      color: #028598 !important;
+  }
+
+  .flatpickr-day.inRange {
+      background: rgba(2, 133, 152, 0.1) !important; 
+      border-color: transparent !important;
+      color: #028598 !important;
+  }
+
+  .flatpickr-current-month .flatpickr-monthDropdown-months:hover {
+      background: #faf1db !important;
+  }
+
+  .flatpickr-current-month, .flatpickr-month, .flatpickr-weekday {
+      color: #028598 !important;
+      fill: #028598 !important;
+  }
+</style>

@@ -1,0 +1,8 @@
+/* Archivo global de estilos CSS para el proyecto Hotel Maya Bay. 
+Aquí se importan los estilos base de Tailwind CSS, 
+lo que permite utilizar sus clases utilitarias en toda la aplicación 
+sin necesidad de importarlas individualmente en cada componente o página. 
+Este enfoque centralizado facilita el mantenimiento y la consistencia visual 
+en todo el sitio web.
+*/
+@import "tailwindcss";

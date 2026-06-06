@@ -1,0 +1,233 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../sections/Header.astro';
+import Footer from '../sections/Footer.astro';
+---
+
+<Layout>
+  <Header />
+  
+  <main class="bg-[#faf1db] pt-32 pb-32 px-4 md:px-12 min-h-screen">
+    
+    <div id="login-container" class="max-w-md mx-auto bg-white p-10 rounded-[2.5rem] shadow-xl mt-12 animate-fade-in-up">
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold text-[#028598] mb-2">Acceso Restringido</h2>
+        <p class="text-[#028598]/70 font-light">Solo personal autorizado</p>
+      </div>
+      
+      <div class="space-y-5">
+        <div>
+          <label class="text-[#028598] font-bold text-sm ml-2 mb-1 block">Usuario</label>
+          <input type="text" id="admin-user" placeholder="Ingresa tu usuario" class="w-full bg-[#faf1db]/30 border-2 border-[#028598]/20 text-[#028598] rounded-xl px-4 py-3 focus:outline-none focus:border-[#028598] transition-colors">
+        </div>
+        <div>
+          <label class="text-[#028598] font-bold text-sm ml-2 mb-1 block">Contraseña</label>
+          <input type="password" id="admin-pass" placeholder="Ingresa tu contraseña" class="w-full bg-[#faf1db]/30 border-2 border-[#028598]/20 text-[#028598] rounded-xl px-4 py-3 focus:outline-none focus:border-[#028598] transition-colors">
+        </div>
+        
+        <p id="login-error" class="text-red-500 text-sm hidden font-bold text-center">Usuario o contraseña incorrectos.</p>
+        
+        <button id="btn-login" class="w-full bg-[#028598] text-[#faf1db] px-6 py-4 rounded-full font-bold hover:bg-[#016574] hover:scale-105 transition-all shadow-md mt-4">
+          Ingresar al Sistema
+        </button>
+      </div>
+    </div>
+
+    <div id="dashboard-container" class="max-w-7xl mx-auto bg-white rounded-[2.5rem] shadow-2xl overflow-hidden hidden">
+      
+      <div class="bg-[#028598] px-8 py-8 text-[#faf1db] flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="text-center md:text-left">
+          <h1 class="text-3xl md:text-4xl font-bold mb-2">Panel de Administración</h1>
+          <p class="text-[#faf1db]/80 font-light">Gestiona las reservas, disponibilidad y traslados de tus huéspedes.</p>
+        </div>
+        <div class="flex items-center gap-3 bg-[#faf1db]/20 px-4 py-2 rounded-full">
+          <span class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></span>
+          <span class="text-sm font-bold tracking-wider">SISTEMA EN LÍNEA</span>
+          <button id="btn-logout" class="ml-4 text-xs font-bold underline hover:text-white">Cerrar Sesión</button>
+        </div>
+      </div>
+
+      <div class="p-8 md:p-12">
+        <div class="flex gap-4 mb-8 border-b-2 border-[#028598]/10 pb-4">
+          <button class="text-[#028598] font-bold border-b-4 border-[#028598] pb-2 px-2">Reservas Activas</button>
+        </div>
+
+        <div class="overflow-x-auto bg-[#faf1db]/20 rounded-2xl border border-[#028598]/10">
+          <table class="w-full text-left border-collapse min-w-[800px]">
+            <thead>
+              <tr class="bg-[#028598]/10 text-[#028598] text-sm uppercase tracking-wider">
+                <th class="p-4 font-bold rounded-tl-2xl">Huésped</th>
+                <th class="p-4 font-bold">Contacto</th>
+                <th class="p-4 font-bold">Fechas (Check In/Out)</th>
+                <th class="p-4 font-bold">Habitación</th>
+                <th class="p-4 font-bold">Traslado</th>
+                <th class="p-4 font-bold text-center rounded-tr-2xl">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="admin-table-body" class="text-[#028598]/80 text-sm divide-y divide-[#028598]/10">
+              <tr>
+                <td colspan="6" class="p-8 text-center text-lg font-bold animate-pulse">Cargando datos del sistema...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <Footer />
+</Layout>
+
+<script>
+  import { supabase } from '../lib/supabase.js';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    
+    // Elementos del DOM
+    const loginContainer = document.getElementById('login-container')!;
+    const dashboardContainer = document.getElementById('dashboard-container')!;
+    const btnLogin = document.getElementById('btn-login') as HTMLButtonElement;
+    const btnLogout = document.getElementById('btn-logout') as HTMLButtonElement;
+    const loginError = document.getElementById('login-error')!;
+    const tableBody = document.getElementById('admin-table-body')!;
+
+    // 1. Lógica de Inicio de Sesión
+    btnLogin.addEventListener('click', () => {
+      const user = (document.getElementById('admin-user') as HTMLInputElement).value;
+      const pass = (document.getElementById('admin-pass') as HTMLInputElement).value;
+
+      // Lista de usuarios leyendo exclusivamente desde el archivo .env
+      const validUsers = [
+        { 
+          username: import.meta.env.PUBLIC_ADMIN_USER, 
+          password: import.meta.env.PUBLIC_ADMIN_PASS 
+        },
+        { 
+          username: import.meta.env.PUBLIC_ADMIN_USER_2, 
+          password: import.meta.env.PUBLIC_ADMIN_PASS_2 
+        },
+        { 
+          username: import.meta.env.PUBLIC_ADMIN_USER_3, 
+          password: import.meta.env.PUBLIC_ADMIN_PASS_3 
+        }
+      ];
+
+      const isValid = validUsers.some(cred => 
+        cred.username && 
+        cred.password && 
+        cred.username === user && 
+        cred.password === pass
+      );
+
+      if (isValid) {
+        loginError.classList.add('hidden');
+        loginContainer.classList.add('hidden');
+        dashboardContainer.classList.remove('hidden');
+        dashboardContainer.classList.add('animate-fade-in-up');
+        
+        fetchReservations();
+      } else {
+        loginError.classList.remove('hidden');
+      }
+    });
+
+    // Lógica de Cierre de Sesión
+    btnLogout.addEventListener('click', () => {
+      // Recargamos la página desde cero. Esto borra los datos de la tabla de la memoria
+      // y vuelve a mostrar el formulario de acceso restringido.
+      window.location.reload();
+    });
+
+    // 2. Función para Cargar y Pintar los Datos 
+    async function fetchReservations() {
+      try {
+        const { data: reservas, error } = await supabase
+          .from('reservas_habitacion')
+          .select(`
+            id,
+            cliente_nombre,
+            cliente_email,
+            fecha_entrada,
+            fecha_salida,
+            habitaciones (numero, tipo),
+            reservas_traslado (fecha_hora, num_pasajeros)
+          `)
+          .order('fecha_entrada', { ascending: true });
+
+        if (error) throw error;
+
+        tableBody.innerHTML = '';
+
+        if (!reservas || reservas.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-500 font-bold">No hay reservas registradas en el sistema.</td></tr>';
+          return;
+        }
+
+        reservas.forEach((res: any) => {
+          const hab = res.habitaciones as any;
+          const habitacion = hab ? `Puerta ${hab.numero} (${hab.tipo})` : 'Sin asignar';
+          
+          let trasladoInfo = '<span class="text-gray-400 italic">No solicitado</span>';
+          const traslados = res.reservas_traslado as any;
+          
+          if (traslados && traslados.length > 0) {
+            const t = traslados[0];
+            const hora = new Date(t.fecha_hora).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            trasladoInfo = `<span class="bg-[#028598] text-white px-2 py-1 rounded-md text-xs font-bold">Sí - ${hora} (${t.num_pasajeros} pasajero(s))</span>`;
+          }
+
+          const tr = document.createElement('tr');
+          tr.className = "hover:bg-white transition-colors group";
+          
+          tr.innerHTML = `
+            <td class="p-4 font-bold text-[#028598]">${res.cliente_nombre}</td>
+            <td class="p-4">${res.cliente_email}</td>
+            <td class="p-4 font-medium"><span class="bg-[#faf1db] px-2 py-1 rounded-md border border-[#028598]/20">${res.fecha_entrada}</span> a <span class="bg-[#faf1db] px-2 py-1 rounded-md border border-[#028598]/20">${res.fecha_salida}</span></td>
+            <td class="p-4">${habitacion}</td>
+            <td class="p-4">${trasladoInfo}</td>
+            <td class="p-4 text-center">
+              <button data-id="${res.id}" class="btn-delete bg-red-100 text-red-600 px-4 py-2 rounded-lg font-bold text-xs hover:bg-red-600 hover:text-white transition-colors shadow-sm">
+                Cancelar Reserva
+              </button>
+            </td>
+          `;
+
+          tableBody.appendChild(tr);
+        });
+
+        document.querySelectorAll('.btn-delete').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            const target = e.target as HTMLElement;
+            const reservaId = target.getAttribute('data-id');
+            const confirmacion = confirm('¿Estás seguro de que deseas cancelar esta reserva? Esta acción liberará la habitación y los asientos de la camioneta.');
+            
+            if (confirmacion && reservaId) {
+              target.innerText = 'Borrando...';
+              target.classList.add('opacity-50', 'cursor-not-allowed');
+
+              try {
+                const { error: deleteError } = await supabase
+                  .from('reservas_habitacion')
+                  .delete()
+                  .eq('id', reservaId);
+                
+                if (deleteError) throw deleteError;
+                
+                await fetchReservations();
+                alert('Reserva eliminada exitosamente.');
+
+              } catch (err) {
+                console.error(err);
+                alert('Hubo un error al eliminar la reserva.');
+              }
+            }
+          });
+        });
+
+      } catch (err) {
+        console.error(err);
+        tableBody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-red-500 font-bold">Error al cargar las reservas. Revisa la consola.</td></tr>';
+      }
+    }
+  });
+</script>
