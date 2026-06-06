@@ -27,8 +27,6 @@ La base de datos relacional en PostgreSQL (Supabase) está estructurada en 4 tab
 3. **reservas_habitacion:** Registro central del alojamiento (datos del cliente y fechas).
 4. **reservas_traslado:** Vinculación opcional del transporte al alojamiento (utilizando borrado en cascada `ON DELETE CASCADE`).
 
-*(Se recomienda incluir aquí una imagen del Diagrama Entidad-Relación).*
-
 ---
 
 ## 🚀 Guía de Instalación y Despliegue
